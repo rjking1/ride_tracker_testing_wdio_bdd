@@ -14,17 +14,26 @@ Then("I cannot see {string}", (str) => {
   cy.contains(str).should("not.exist");
 });
 
-Then("go to {string}", (str) => {
+Then("go to {string}", async (str) => {
   // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(1000);
-  cy.contains(str).click();
+  // cy.wait(1000);
+  // cy.contains(str).click();
+  await $(`button=${str}`).click();
   // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(500);
+  // cy.wait(500);
 });
 
-Then("save {string} to csv", (str) => {
-  cy.contains(str).click();
-  cy.contains("Save to CSV file").click(); // button at bottom of a table
+When("save {string} to csv", async (str) => {
+  // cy.contains(str).click();
+  // cy.contains("Save to CSV file").click(); // button at bottom of a table
+  await $(`button*=${str}`).click();
+  await $(`button=Save to CSV file`).click();
+
+  // comp : no file mgmt like cy
+  // downloaded file goes to Download folder 
+  // with random.tmp filename !? HOw to deal with this?
+  // see this: https://blog.kevinlamping.com/downloading-files-using-webdriverio/
+  
   // todo
   // will get quoted cells if we use utils.exportTableToCSV()
   // which is what Save To CSV button should use
@@ -38,8 +47,8 @@ Then("save table {string} to file {string}", (selector, fileName) => {
   // which is what Save To CSV button should use
 });
 
-Then("It should match the expected {string} csv file", (str) => {
-  compareFiles(  //WithIgnoreOption(
+Then("It should match the expected {string} csv file", async (str) => {
+  compareFiles(
     `./cypress/downloads/${str}.csv`,
     `./cypress/expected/${str}.csv`
   );

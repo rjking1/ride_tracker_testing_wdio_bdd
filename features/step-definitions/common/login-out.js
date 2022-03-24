@@ -7,7 +7,7 @@ const { Given, When, Then } = require('@wdio/cucumber-framework');
 Given("I login as a developer", async () => {
 
   // cy.visit(Cypress.env("PROD_URL"));
-  await browser.url(`https://artspace7.com.au/plus/`);
+  await browser.url(`https://artspace7.com.au/pybase/plus/`);
 
   // cy.get("#db").focus().clear().type(Cypress.env("DB_NAME"));
   // cy.get("#user").focus().clear().type(Cypress.env("DEV_NAME"));

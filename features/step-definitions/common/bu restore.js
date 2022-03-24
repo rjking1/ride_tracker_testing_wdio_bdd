@@ -5,11 +5,21 @@ const { Given, When, Then } = require('@wdio/cucumber-framework');
 const BU_FILE_NAME = "test"; // .sql
 const TEST_DB = "test";
 
-Then("Backup the {string} db", (db) => {
-  cy.get("#bu_db").focus().clear().type(db);
-  cy.get("#bu_file").focus().clear().type(BU_FILE_NAME);
-  cy.get("#backup").click();
-  cy.contains("Backed up", { timeout: 60000 });
+Then("Backup the {string} db", async (db) => {
+  // cy.get("#bu_db").focus().clear().type(db);
+  // cy.get("#bu_file").focus().clear().type(BU_FILE_NAME);
+  // cy.get("#backup").click();
+  // cy.contains("Backed up", { timeout: 60000 });
+  await $('#bu_db').setValue(db);
+  await $('#bu_file').setValue('test');
+  await $('#backup').click();
+  // comp: need to write a simple contains with auto wait as per cypress
+  await $('#status').waitUntil(async function () {
+    return (await this.getText()) === 'Backed up'
+  }, {
+    timeout: 5000,
+    timeoutMsg: 'Failed to backup DB'
+  });
 });
 
 Then("Backup the {string} db schema", (db) => {
@@ -42,11 +52,21 @@ Then("Backup the {string} db tables {string}", (db, tables) => {
   cy.contains("Backed up", { timeout: 60000 });
 });
 
-Then("Restore to the test db", () => {
-  cy.get("#rest_file").focus().clear().type(BU_FILE_NAME);
-  cy.get("#rest_db").focus().clear().type(TEST_DB); // should be set to test but belt and braces and CAREFUL since we login to the "nem" db to recover at times
-  cy.get("#restore").click();
-  cy.contains("Restored", { timeout: 120000 });
+Then("Restore to the test db", async () => {
+  // cy.get("#rest_file").focus().clear().type(BU_FILE_NAME);
+  // cy.get("#rest_db").focus().clear().type(TEST_DB); // should be set to test but belt and braces and CAREFUL since we login to the "nem" db to recover at times
+  // cy.get("#restore").click();
+  // cy.contains("Restored", { timeout: 120000 });
+  await $('#rest_file').setValue('test');
+  await $('#rest_db').setValue('test');
+  await $('#restore').click();
+  // comp: need to write a simple contains with auto wait as per cypress
+  await $('#status').waitUntil(async function () {
+    return (await this.getText()) === 'Restored'
+  }, {
+    timeout: 60000,
+    timeoutMsg: 'Failed to restore DB'
+  });
 });
 
 Then("Load historical data for {string}", (dateRange) => {

@@ -3,6 +3,9 @@
 // if different then compares line by line,
 // then item by item to allow for tolerance and date variations
 // - doesn't support quoted items atm
+
+// comp: see https://blog.kevinlamping.com/downloading-files-using-webdriverio/
+
 function compareFiles(
   actualFileName,
   expectedFileName,
@@ -192,4 +195,4 @@ function random(length = 8) {
   return Math.random().toString(16).substr(2, length);
 }
 
-module.exports = { compareFiles, compareFilesUsingRegExp, exportTableToCSV}
+module.exports = { compareFiles, compareFilesUsingRegExp, exportTableToCSV, exportPartialDOMToFile}
