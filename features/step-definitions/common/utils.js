@@ -1,3 +1,7 @@
+const { tmpdir } = require('os');
+const { readFileSync, fstat } = require('fs');
+const { Blob } = require('buffer');
+
 // compares two csv files
 // does a string compare of the entire file
 // if different then compares line by line,
@@ -12,79 +16,78 @@ function compareFiles(
   tolerance = 0.001,
   willFail = false
 ) {
-  cy.readFile(actualFileName).then((actual) => {
-    cy.readFile(expectedFileName).then((expected) => {
-      // strip CRs leaving only LFs (Windows / Unix)
-      actual = actual.replace(/\r\n/g, "\n");
-      expected = expected.replace(/\r\n/g, "\n");
+  actual = readFileSync(actualFileName, 'utf8'); // cy.readFile(actualFileName).then((actual) => {
+  expected = readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
+  
+  // strip CRs leaving only LFs (Windows / Unix)
+  actual = actual.replace(/\r\n/g, "\n");
+  expected = expected.replace(/\r\n/g, "\n");
 
-      // for speed first check if files are identical
-      if (actual != expected) {
-        if (willFail) {
-          cy.log("** Actual differs from Expected ; IGNORED **");
-          return;
-        }
-        // not equal -- check line by line
-        // do our own check so we only get failures reported
-        // is there not a better way?
-        const actuals = actual.split("\n");
-        const expecteds = expected.split("\n");
+  // for speed first check if files are identical
+  if (actual != expected) {
+    if (willFail) {
+      cy.log("** Actual differs from Expected ; IGNORED **");
+      return;
+    }
+    // not equal -- check line by line
+    // do our own check so we only get failures reported
+    // is there not a better way?
+    const actuals = actual.split("\n");
+    const expecteds = expected.split("\n");
 
-        // check line counts
-        if (actuals.length != expecteds.length) {
-          expect(actuals.length).to.equal(expecteds.length);
-        } else {
-          actuals.forEach((aline, index) => {
-            const eline = expecteds[index];
-            if (aline != eline) {
-              // actual line is not equal to expected line when doing a string compare
-              // so compare item by item (comma separated)
-              // as floats might be witin tolerance and dates might be equal (just formatted differently)
-              cy.log("Lines differ", [aline, eline]);
-              const aitems = aline.split(",");
-              const eitems = eline.split(",");
-              let okay = true; // assume good until we find a bad item match
-              aitems.forEach((aitem, index2) => {
-                const eitem = eitems[index2];
-                cy.log("Items", [aitem, eitem]);
-                if (okay) {
-                  if (aitem != eitem) {
-                    let itemOkay = false;
-                    // try to compare as floats
-                    if (eitem.match(/-?\d+\.\d+/)) {
-                      itemOkay =
-                        Math.abs(parseFloat(aitem) - parseFloat(eitem)) <=
-                        tolerance;
-                      if (itemOkay) {
-                        cy.log("but items are within tolerance");
-                      } else {
-                        cy.log("out of tolerance");
-                      }
-                    }
-                    // try to compare as dates
-                    // match on ISO YYYY-MM-DD with space or T... or Australian DD/MM/YYYY...
-                    else if (eitem.match(/^\d{2,4}.\d{2}.\d{2,4}.*/)) {
-                      cy.log(aitem, eitem);
-                      itemOkay = parseDate(aitem) == parseDate(eitem);
-                      if (itemOkay) {
-                        cy.log("but dates match");
-                      } else {
-                        cy.log("dates mismatch");
-                      }
-                    }
-                    okay &= itemOkay;
+    // check line counts
+    if (actuals.length != expecteds.length) {
+      expect(actuals.length).to.equal(expecteds.length);
+    } else {
+      actuals.forEach((aline, index) => {
+        const eline = expecteds[index];
+        if (aline != eline) {
+          // actual line is not equal to expected line when doing a string compare
+          // so compare item by item (comma separated)
+          // as floats might be witin tolerance and dates might be equal (just formatted differently)
+          cy.log("Lines differ", [aline, eline]);
+          const aitems = aline.split(",");
+          const eitems = eline.split(",");
+          let okay = true; // assume good until we find a bad item match
+          aitems.forEach((aitem, index2) => {
+            const eitem = eitems[index2];
+            cy.log("Items", [aitem, eitem]);
+            if (okay) {
+              if (aitem != eitem) {
+                let itemOkay = false;
+                // try to compare as floats
+                if (eitem.match(/-?\d+\.\d+/)) {
+                  itemOkay =
+                    Math.abs(parseFloat(aitem) - parseFloat(eitem)) <=
+                    tolerance;
+                  if (itemOkay) {
+                    cy.log("but items are within tolerance");
+                  } else {
+                    cy.log("out of tolerance");
                   }
                 }
-              });
-              if (!okay) {
-                expect(aline).to.equal(eline);
+                // try to compare as dates
+                // match on ISO YYYY-MM-DD with space or T... or Australian DD/MM/YYYY...
+                else if (eitem.match(/^\d{2,4}.\d{2}.\d{2,4}.*/)) {
+                  cy.log(aitem, eitem);
+                  itemOkay = parseDate(aitem) == parseDate(eitem);
+                  if (itemOkay) {
+                    cy.log("but dates match");
+                  } else {
+                    cy.log("dates mismatch");
+                  }
+                }
+                okay &= itemOkay;
               }
             }
           });
+          if (!okay) {
+            expect(aline).to.equal(eline);
+          }
         }
-      }
-    });
-  });
+      });
+    }
+  }
 }
 
 function parseDate(dateString) {
@@ -100,38 +103,99 @@ function parseDate(dateString) {
   }
 }
 
-function exportTableToCSV(tableSelector, filename) {
-  // todo fix this has a problem that it exports all rows -- even those filterd out (hidden)
-  let csv = [];
-  tableSelector
-    .find("tr:visible", { log: false })
-    .each((el) => {
-      let row = [];
-      cy.wrap(el, { log: false })
-        .find("td,th", { log: false })
-        .each((cell) => {
-          row.push('"' + cell.text() + '"');
-        })
-        .then(() => {
-          csv.push(row.join(","));
-        });
-    })
-    .then(() => {
-      downloadCSV(csv.join("\n"), filename);
-    });
+// from https://stackoverflow.com/questions/15547198/export-html-table-to-csv-using-vanilla-javascript
+async function downloadAsCSV(tableEle, fileName, separator = ',') {
+  let data = "";
+  const tableData = [];
+  const rows = await $$("table tr");
+  for (const row of rows) {
+    const rowData = [];
+    for (column of await row.$$("th, td")) {
+        rowData.push('"' + await column.getText() + '"');
+    }
+    tableData.push(rowData.join(separator));
+  }
+  data += tableData.join("\n");
+
+  // console.log(data);
+
+  // const a = document.createElement("a");
+  // a.href = URL.createObjectURL(new Blob([data], { type: "text/csv" }));
+  // a.setAttribute("download", fileName);
+  // document.body.appendChild(a);
+  // a.click();
+  // document.body.removeChild(a);
+  await downloadCSV(data, fileName);
 }
 
-function downloadCSV(csv, filename) {
+async function exportTableToCSV(tableSelector, filename) {
+  // todo fix this has a problem that it exports all rows -- even those filterd out (hidden)
+  // let csv = [];
+  // tableSelector
+  //   .find("tr:visible", { log: false })
+  //   .each((el) => {
+  //     let row = [];
+  //     cy.wrap(el, { log: false })
+  //       .find("td,th", { log: false })
+  //       .each((cell) => {
+  //         row.push('"' + cell.text() + '"');
+  //       })
+  //       .then(() => {
+  //         csv.push(row.join(","));
+  //       });
+  //   })
+  //   .then(() => {
+  //     downloadCSV(csv.join("\n"), filename);
+  //   });
+  // downloadCSV(csv.join("\n"), filename);
+}
+
+async function downloadCSV(csv, filename) {
   let csvFile;
   let downloadLink;
 
   csvFile = new Blob([csv], { type: "text/csv" });
-  downloadLink = document.createElement("a");
+  const b = await $('#searchBox');
+  console.log('b=' + b);
+  downloadLink = b.createElement("a");
   downloadLink.download = filename;
   downloadLink.href = window.URL.createObjectURL(csvFile);
   downloadLink.style.display = "none";
-  document.body.appendChild(downloadLink);
+  // document.body.appendChild(downloadLink);
   downloadLink.click();
+  browser.call(function () {
+    // call our custom function that checks for the file to exist
+    return waitForFileExists(filename, 60000);
+  });
+}
+
+// pulled from https://stackoverflow.com/a/47764403
+function waitForFileExists(filePath, timeout) {
+  return new Promise(function (resolve, reject) {
+
+    var timer = setTimeout(function () {
+      watcher.close();
+      reject(new Error('File did not exists and was not created during the timeout.'));
+    }, timeout);
+
+    fs.access(filePath, fs.constants.R_OK, function (err) {
+      if (!err) {
+        clearTimeout(timer);
+        watcher.close();
+        resolve();
+      }
+    });
+
+    var dir = path.dirname(filePath);
+    var basename = path.basename(filePath);
+    var watcher = fs.watch(dir, function (eventType, filename) {
+      if (eventType === 'rename' && filename === basename) {
+        clearTimeout(timer);
+        watcher.close();
+        resolve();
+      }
+    });
+  });
 }
 
 function compareFilesUsingRegExp(
@@ -195,4 +259,4 @@ function random(length = 8) {
   return Math.random().toString(16).substr(2, length);
 }
 
-module.exports = { compareFiles, compareFilesUsingRegExp, exportTableToCSV, exportPartialDOMToFile}
+module.exports = { compareFiles, compareFilesUsingRegExp, exportTableToCSV, exportPartialDOMToFile, downloadAsCSV}

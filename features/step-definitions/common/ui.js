@@ -1,10 +1,12 @@
 // import { And, Given, Then, When } from "cypress-cucumber-preprocessor/steps";
+const { tmpdir } = require('os');
 const { Given, When, Then } = require('@wdio/cucumber-framework');
-// import {
-//   compareFiles,
-//   compareFilesWithIgnoreOption,
-//   exportTableToCSV,
-// } from "../common/utils.js";
+const {
+  compareFiles,
+  compareFilesWithIgnoreOption,
+  exportTableToCSV,
+  downloadAsCSV
+} = require("../common/utils.js");
 
 Then("I can see {string}", (str) => {
   cy.contains(str).should("exist");
@@ -27,7 +29,13 @@ When("save {string} to csv", async (str) => {
   // cy.contains(str).click();
   // cy.contains("Save to CSV file").click(); // button at bottom of a table
   await $(`button*=${str}`).click();
+
+  // rather than use csv for the moment
   await $(`button=Save to CSV file`).click();
+  await browser.pause(500);
+
+  // use as this ives us quoted cells
+  // await downloadAsCSV(await $('table'), `${str}.csv`);
 
   // comp : no file mgmt like cy
   // downloaded file goes to Download folder 
@@ -39,9 +47,9 @@ When("save {string} to csv", async (str) => {
   // which is what Save To CSV button should use
 });
 
-Then("save table {string} to file {string}", (selector, fileName) => {
-  exportTableToCSV(cy.get(selector), fileName);
-  cy.get(selector);
+Then("save table {string} to file {string}", async (selector, fileName) => {
+  await downloadAsCSV(await $(selector), fileName);
+  //cy.get(selector);
   // todo
   // will get quoted cells if we use utils.exportTableToCSV()
   // which is what Save To CSV button should use
@@ -49,8 +57,8 @@ Then("save table {string} to file {string}", (selector, fileName) => {
 
 Then("It should match the expected {string} csv file", async (str) => {
   compareFiles(
-    `./cypress/downloads/${str}.csv`,
-    `./cypress/expected/${str}.csv`
+    `./download/${str}.csv`,
+    `./expected/${str}.csv`
   );
 });
 
@@ -69,8 +77,8 @@ Then("save chart {string}", (selector) => {
 
 Then("the saved chart should match the expected {string} csv file", (str) => {
   compareFilesWithIgnoreOption(
-    `./cypress/downloads/saved_chart.csv`,
-    `./cypress/expected/${str}.csv`,
+    `./download/saved_chart.csv`,
+    `./expected/${str}.csv`,
     [0]
   );
 });

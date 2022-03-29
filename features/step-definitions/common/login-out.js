@@ -34,6 +34,7 @@ Given("I login as a developer", async () => {
 //   cy.wait(1000);
 // });
 
-Then("I logout", () => {
+Then("I logout", async () => {
   // cy.visit(Cypress.env("PROD_URL"));
+  await browser.pause(1000)
 });
