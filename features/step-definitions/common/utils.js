@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 // const { Blob } = require('buffer');
+const expectChai = require('chai').expect;
 
 // compares two csv files
 // does a string compare of the entire file
@@ -117,8 +118,8 @@ async function downloadAsCSV(tableEle, fileName, separator = ',') {
     tableData.push(rowData.join(separator));
   }
   data += tableData.join("\n");
-  const x = await downloadCSV(data, fileName)
-  console.log('download result='+ x);
+  await downloadCSV(data, fileName)
+  // console.log('download result='+ x);
 }
 
 async function downloadCSV(csv, filename) {
@@ -132,7 +133,7 @@ async function downloadCSV(csv, filename) {
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       await downloadLink.click();
-      return downloadLink.href;
+      // return downloadLink.href;
     }, csv, filename
   );
     // browser.call(function () {
@@ -196,7 +197,7 @@ function compareFilesUsingRegExp(
   expectedLines.forEach((expectedLine, index) => {
     const actualLine = actualLines[index];
     if (index < rows) {
-      expect(actualLine).to.match(new RegExp(expectedLine));
+      expectChai(actualLine).to.match(new RegExp(expectedLine));
     }
   });
 }

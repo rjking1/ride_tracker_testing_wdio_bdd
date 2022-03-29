@@ -1,9 +1,8 @@
 // import { And, Given, Then, When } from "cypress-cucumber-preprocessor/steps";
-const { tmpdir } = require('os');
 const { Given, When, Then } = require('@wdio/cucumber-framework');
 const {
   compareFiles,
-  compareFilesWithIgnoreOption,
+  // compareFilesWithIgnoreOption,
   downloadAsCSV,
   cleanFilesInDir
 } = require("../common/utils.js");
@@ -27,10 +26,11 @@ Then("go to {string}", async (str) => {
 
 When("save {string} to csv", async (str) => {
   // cy.contains(str).click();
-  // cy.contains("Save to CSV file").click(); // button at bottom of a table
   await $(`button*=${str}`).click();
-
+  
+  // cy.contains("Save to CSV file").click(); // button at bottom of a table
   await $(`button=Save to CSV file`).click();
+  
   await browser.pause(500);  // without this we get the fiie but with a temp file name
 
   // comp : no file mgmt like cy

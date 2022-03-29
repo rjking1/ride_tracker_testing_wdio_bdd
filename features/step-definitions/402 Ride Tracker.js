@@ -1,6 +1,12 @@
 // import { And, Then } from "cypress-cucumber-preprocessor/steps";
 //import { Given, And, When, Then } from '@wdio/cucumber-framework';
 const { Given, When, Then } = require('@wdio/cucumber-framework');
+const {
+  compareFiles,
+  downloadAsCSV,
+  compareFilesUsingRegExp,
+  cleanFilesInDir
+} = require("./common/utils.js");
 
 // comp: error: SyntaxError: Cannot use import statement outside a module
 // I need to understand modules, importing and exporting better 
@@ -14,9 +20,9 @@ Given("I login to Ride Tracker", async () => {
   // cy.visit(Cypress.env("RIDE_TRACKER_URL"));
   await browser.url(`https://artspace7.com.au/rides`);
 
-  // cy.get("#db").focus().clear().type(Cypress.env("DB_NAME"));
-  // cy.get("#user").focus().clear().type(Cypress.env("DEV_NAME"));
-  // cy.get("#password").focus().clear().type(Cypress.env("DEV_PASSWORD"));
+  // cy.get("#db").setValue(Cypress.env("DB_NAME"));
+  // cy.get("#user").setValue(Cypress.env("DEV_NAME"));
+  // cy.get("#password").setValue(Cypress.env("DEV_PASSWORD"));
   // cy.get("#login").click();
   // // eslint-disable-next-line cypress/no-unnecessary-waiting
   // cy.wait(1000);
@@ -27,6 +33,7 @@ Given("I login to Ride Tracker", async () => {
   await $('#user').setValue('richard');
   await $('#password').setValue('viking');
   await $('#login').click();
+  await browser.pause(1000);
 });
 
 Then("check the stats are within reason", async () => {
@@ -41,37 +48,42 @@ Then("check the stats are within reason", async () => {
 });
 
 When("add a ride", async () => {
-  // cy.contains("Add").click();
-  // cy.get("#id_km").focus().clear().type("99");
-  // cy.get("#id_alt").focus().clear().type("1234");
-  // cy.get("#id_desc").focus().clear().type("test ride");
-  // cy.get("#id_weather").focus().clear().type("sunny");
-  // cy.contains("Add Ride").click();
+  await $("button=Add").click();
+  await browser.pause(500);
+  await $("#id_km").setValue("99");
+  await $("#id_alt").setValue("1234");
+  await $("#id_desc").setValue("test ride");
+  await $("#id_weather").setValue("sunny");
+  await $("button=Add Ride").click();
+  await browser.pause(500);
 });
 
 Then("check the ride is the most recent", async () => {
   // exportTableToCSV(cy.get("table"), "rides.csv");
-  // compareFilesUsingRegExp(
-  //   "./cypress/downloads/rides.csv",
-  //   "./cypress/expected/rides.csv",
-  //   2
-  // );
+  await downloadAsCSV(await $("table"), "rides.csv");
+  compareFilesUsingRegExp(
+    "./download/rides.csv",
+    "./expected/rides.csv",
+    2
+  );
 });
 
 When("edit a ride", async () => {
-  // cy.contains("✎ Edit").click();
-  // cy.get("#id_km").focus().clear().type("88");
-  // cy.get("#id_alt").focus().clear().type("1111");
-  // cy.get("#id_desc").focus().clear().type("test ride edited");
-  // cy.get("#id_weather").focus().clear().type("rainy");
-  // cy.contains("Update").click();
+  await $("button=✎ Edit").click();
+  await browser.pause(500);
+  await $("#id_km").setValue("88");
+  await $("#id_alt").setValue("1111");
+  await $("#id_desc").setValue("test ride edited");
+  await $("#id_weather").setValue("rainy");
+  await $("button=Update").click();
+  await browser.pause(500);
 });
 
 Then("check the ride has been edited correctly", async () => {
-  // exportTableToCSV(cy.get("table"), "rides2.csv");
-  // compareFilesUsingRegExp(
-  //   "./cypress/downloads/rides2.csv",
-  //   "./cypress/expected/rides2.csv",
-  //   2
-  // );
+  await downloadAsCSV(await $("table"), "rides2.csv");
+  compareFilesUsingRegExp(
+    "./download/rides2.csv",
+    "./expected/rides2.csv",
+    2
+  );
 });
