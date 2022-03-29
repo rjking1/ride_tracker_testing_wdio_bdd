@@ -123,7 +123,6 @@ async function downloadAsCSV(tableEle, fileName, separator = ',') {
 }
 
 async function downloadCSV(csv, filename) {
-  // const x =
   await browser.execute(
     async function (csv, filename) {
       const csvFile = new Blob([csv], { type: "text/csv" });
@@ -133,7 +132,6 @@ async function downloadCSV(csv, filename) {
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       await downloadLink.click();
-      // return downloadLink.href;
     }, csv, filename
   );
     // browser.call(function () {
@@ -141,7 +139,6 @@ async function downloadCSV(csv, filename) {
       //   return waitForFileExists(filename, 60000);
       // });
   await browser.pause(1000);
-  // return x
 }
 
 // pulled from https://stackoverflow.com/a/47764403
@@ -207,7 +204,7 @@ async function exportPartialDOMToFile(selector, filename) {
   // but it does the job
   // will use an official cypress snapshot function/command when we can
   const html = await $(selector).getHTML()
-  downloadCSV(html, filename); // todo rename downloadCSV to be more general
+  await downloadCSV(html, filename); // todo rename downloadCSV to be more general
 }
 
 // don't use this routine until properly tested!
@@ -231,7 +228,7 @@ function random(length = 8) {
   return Math.random().toString(16).substr(2, length);
 }
 
-function cleanFilesInDir(directory) {
+async function cleanFilesInDir(directory) {
   fs.readdir(directory, (err, files) => {
     if (err) throw err;
 

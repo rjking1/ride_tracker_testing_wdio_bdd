@@ -30,7 +30,7 @@ When("save {string} to csv", async (str) => {
   
   // cy.contains("Save to CSV file").click(); // button at bottom of a table
   await $(`button=Save to CSV file`).click();
-  
+
   await browser.pause(500);  // without this we get the fiie but with a temp file name
 
   // comp : no file mgmt like cy
@@ -79,6 +79,6 @@ Then("the saved chart should match the expected {string} csv file", (str) => {
   );
 });
 
-Then("Clean download folder", () => {
-  cleanFilesInDir('C:\\devel\\testing\\ride_tracker_testing_wdio_bdd\\download')
+Then("Clean download folder", async () => {
+  await cleanFilesInDir('C:\\devel\\testing\\ride_tracker_testing_wdio_bdd\\download')
 })
