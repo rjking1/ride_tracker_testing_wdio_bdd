@@ -206,9 +206,8 @@ async function exportPartialDOMToFile(selector, filename) {
   // this is a poor mans DOM snapshot comparison
   // but it does the job
   // will use an official cypress snapshot function/command when we can
-  const el = await $(selector)
-  //downloadCSV(el.get(0).outerHTML, filename); // todo rename downloadCSV to be more general
-  // above needs to get first child?
+  const html = await $(selector).getHTML()
+  downloadCSV(html, filename); // todo rename downloadCSV to be more general
 }
 
 // don't use this routine until properly tested!
