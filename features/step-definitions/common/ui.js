@@ -4,8 +4,8 @@ const { Given, When, Then } = require('@wdio/cucumber-framework');
 const {
   compareFiles,
   compareFilesWithIgnoreOption,
-  exportTableToCSV,
-  downloadAsCSV
+  downloadAsCSV,
+  cleanFilesInDir
 } = require("../common/utils.js");
 
 Then("I can see {string}", (str) => {
@@ -30,12 +30,8 @@ When("save {string} to csv", async (str) => {
   // cy.contains("Save to CSV file").click(); // button at bottom of a table
   await $(`button*=${str}`).click();
 
-  // rather than use csv for the moment
   await $(`button=Save to CSV file`).click();
-  await browser.pause(500);
-
-  // use as this ives us quoted cells
-  // await downloadAsCSV(await $('table'), `${str}.csv`);
+  await browser.pause(500);  // without this we get the fiie but with a temp file name
 
   // comp : no file mgmt like cy
   // downloaded file goes to Download folder 
@@ -82,3 +78,7 @@ Then("the saved chart should match the expected {string} csv file", (str) => {
     [0]
   );
 });
+
+Then("Clean download folder", () => {
+  cleanFilesInDir('C:\\devel\\testing\\ride_tracker_testing_wdio_bdd\\download')
+})

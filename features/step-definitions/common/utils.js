@@ -1,6 +1,7 @@
-const { tmpdir } = require('os');
-const { readFileSync, fstat } = require('fs');
-const { Blob } = require('buffer');
+// const { tmpdir } = require('os');
+const fs = require('fs');
+const path = require('path');
+// const { Blob } = require('buffer');
 
 // compares two csv files
 // does a string compare of the entire file
@@ -16,8 +17,8 @@ function compareFiles(
   tolerance = 0.001,
   willFail = false
 ) {
-  actual = readFileSync(actualFileName, 'utf8'); // cy.readFile(actualFileName).then((actual) => {
-  expected = readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
+  actual = fs.readFileSync(actualFileName, 'utf8'); // cy.readFile(actualFileName).then((actual) => {
+  expected = fs.readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
   
   // strip CRs leaving only LFs (Windows / Unix)
   actual = actual.replace(/\r\n/g, "\n");
@@ -26,7 +27,7 @@ function compareFiles(
   // for speed first check if files are identical
   if (actual != expected) {
     if (willFail) {
-      cy.log("** Actual differs from Expected ; IGNORED **");
+      console.log("** Actual differs from Expected ; IGNORED **");
       return;
     }
     // not equal -- check line by line
@@ -45,13 +46,13 @@ function compareFiles(
           // actual line is not equal to expected line when doing a string compare
           // so compare item by item (comma separated)
           // as floats might be witin tolerance and dates might be equal (just formatted differently)
-          cy.log("Lines differ", [aline, eline]);
+          console.log("Lines differ", [aline, eline]);
           const aitems = aline.split(",");
           const eitems = eline.split(",");
           let okay = true; // assume good until we find a bad item match
           aitems.forEach((aitem, index2) => {
             const eitem = eitems[index2];
-            cy.log("Items", [aitem, eitem]);
+            console.log("Items", [aitem, eitem]);
             if (okay) {
               if (aitem != eitem) {
                 let itemOkay = false;
@@ -61,20 +62,20 @@ function compareFiles(
                     Math.abs(parseFloat(aitem) - parseFloat(eitem)) <=
                     tolerance;
                   if (itemOkay) {
-                    cy.log("but items are within tolerance");
+                    console.log("but items are within tolerance");
                   } else {
-                    cy.log("out of tolerance");
+                    console.log("out of tolerance");
                   }
                 }
                 // try to compare as dates
                 // match on ISO YYYY-MM-DD with space or T... or Australian DD/MM/YYYY...
                 else if (eitem.match(/^\d{2,4}.\d{2}.\d{2,4}.*/)) {
-                  cy.log(aitem, eitem);
+                  console.log(aitem, eitem);
                   itemOkay = parseDate(aitem) == parseDate(eitem);
                   if (itemOkay) {
-                    cy.log("but dates match");
+                    console.log("but dates match");
                   } else {
-                    cy.log("dates mismatch");
+                    console.log("dates mismatch");
                   }
                 }
                 okay &= itemOkay;
@@ -107,7 +108,7 @@ function parseDate(dateString) {
 async function downloadAsCSV(tableEle, fileName, separator = ',') {
   let data = "";
   const tableData = [];
-  const rows = await $$("table tr");
+  const rows = await $(tableEle).$$("table tr");
   for (const row of rows) {
     const rowData = [];
     for (column of await row.$$("th, td")) {
@@ -116,57 +117,30 @@ async function downloadAsCSV(tableEle, fileName, separator = ',') {
     tableData.push(rowData.join(separator));
   }
   data += tableData.join("\n");
-
-  // console.log(data);
-
-  // const a = document.createElement("a");
-  // a.href = URL.createObjectURL(new Blob([data], { type: "text/csv" }));
-  // a.setAttribute("download", fileName);
-  // document.body.appendChild(a);
-  // a.click();
-  // document.body.removeChild(a);
-  await downloadCSV(data, fileName);
-}
-
-async function exportTableToCSV(tableSelector, filename) {
-  // todo fix this has a problem that it exports all rows -- even those filterd out (hidden)
-  // let csv = [];
-  // tableSelector
-  //   .find("tr:visible", { log: false })
-  //   .each((el) => {
-  //     let row = [];
-  //     cy.wrap(el, { log: false })
-  //       .find("td,th", { log: false })
-  //       .each((cell) => {
-  //         row.push('"' + cell.text() + '"');
-  //       })
-  //       .then(() => {
-  //         csv.push(row.join(","));
-  //       });
-  //   })
-  //   .then(() => {
-  //     downloadCSV(csv.join("\n"), filename);
-  //   });
-  // downloadCSV(csv.join("\n"), filename);
+  const x = await downloadCSV(data, fileName)
+  console.log('download result='+ x);
 }
 
 async function downloadCSV(csv, filename) {
-  let csvFile;
-  let downloadLink;
-
-  csvFile = new Blob([csv], { type: "text/csv" });
-  const b = await $('#searchBox');
-  console.log('b=' + b);
-  downloadLink = b.createElement("a");
-  downloadLink.download = filename;
-  downloadLink.href = window.URL.createObjectURL(csvFile);
-  downloadLink.style.display = "none";
-  // document.body.appendChild(downloadLink);
-  downloadLink.click();
-  browser.call(function () {
-    // call our custom function that checks for the file to exist
-    return waitForFileExists(filename, 60000);
-  });
+  // const x =
+  await browser.execute(
+    async function (csv, filename) {
+      const csvFile = new Blob([csv], { type: "text/csv" });
+      const downloadLink = document.createElement("a");
+      downloadLink.download = filename;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      await downloadLink.click();
+      return downloadLink.href;
+    }, csv, filename
+  );
+    // browser.call(function () {
+      //   // call our custom function that checks for the file to exist
+      //   return waitForFileExists(filename, 60000);
+      // });
+  await browser.pause(1000);
+  // return x
 }
 
 // pulled from https://stackoverflow.com/a/47764403
@@ -207,56 +181,66 @@ function compareFilesUsingRegExp(
   // the remainder of the actual file is not checked
   // (this is to provide a means of having "don't care" fields and rows)
   // the expected file rows are treated as RegExp's
-  cy.readFile(actualFileName).then((actual) => {
-    cy.readFile(expectedFileName).then((expected) => {
-      // strip CRs leaving only LFs (Windows / Unix)
-      actual = actual.replace(/\r\n/g, "\n");
-      expected = expected.replace(/\r\n/g, "\n");
+  actual = fs.readFileSync(actualFileName, 'utf8'); // cy.readFile(actualFileName).then((actual) => {
+  expected = fs.readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
+  // strip CRs leaving only LFs (Windows / Unix)
+  actual = actual.replace(/\r\n/g, "\n");
+  expected = expected.replace(/\r\n/g, "\n");
 
-      // check line by line using RegExp
-      const actualLines = actual.split("\n");
-      const expectedLines = expected.split("\n");
+  // check line by line using RegExp
+  const actualLines = actual.split("\n");
+  const expectedLines = expected.split("\n");
 
-      // only compare at most the number of lines in expected results file
-      // or a maxiumum of <rows>
-      expectedLines.forEach((expectedLine, index) => {
-        const actualLine = actualLines[index];
-        if (index < rows) {
-          expect(actualLine).to.match(new RegExp(expectedLine));
-        }
-      });
-    });
+  // only compare at most the number of lines in expected results file
+  // or a maxiumum of <rows>
+  expectedLines.forEach((expectedLine, index) => {
+    const actualLine = actualLines[index];
+    if (index < rows) {
+      expect(actualLine).to.match(new RegExp(expectedLine));
+    }
   });
 }
 
-function exportPartialDOMToFile(selector, filename) {
+async function exportPartialDOMToFile(selector, filename) {
   // this is a poor mans DOM snapshot comparison
   // but it does the job
   // will use an official cypress snapshot function/command when we can
-  cy.get(selector).then(($el) => {
-    downloadCSV($el.get(0).outerHTML, filename); // todo rename downloadCSV to be more general
-  });
+  const el = await $(selector)
+  //downloadCSV(el.get(0).outerHTML, filename); // todo rename downloadCSV to be more general
+  // above needs to get first child?
 }
 
 // don't use this routine until properly tested!
-function compareFilesWithIgnoreOption(a, e, ignoreCols = [-1]) {
+// function compareFilesWithIgnoreOption(a, e, ignoreCols = [-1]) {
   // let alines =
-  cy.readFile(a).then((actual) => {
-    cy.readFile(e).then((expected) => {
-      let a = actual.split("\n");
-      let e = expected.split("\n");
-      for (let i = 0; i++; i < a.length) {
-        if (i in ignoreCols) {
-        } else {
-          expect(a[i]).to.equal(e[i]);
-        }
-      }
-    });
-  });
-}
+  // cy.readFile(a).then((actual) => {
+  //   cy.readFile(e).then((expected) => {
+  //     let a = actual.split("\n");
+  //     let e = expected.split("\n");
+  //     for (let i = 0; i++; i < a.length) {
+  //       if (i in ignoreCols) {
+  //       } else {
+  //         expect(a[i]).to.equal(e[i]);
+  //       }
+  //     }
+  //   });
+  // });
+// }
 
 function random(length = 8) {
   return Math.random().toString(16).substr(2, length);
 }
 
-module.exports = { compareFiles, compareFilesUsingRegExp, exportTableToCSV, exportPartialDOMToFile, downloadAsCSV}
+function cleanFilesInDir(directory) {
+  fs.readdir(directory, (err, files) => {
+    if (err) throw err;
+
+    for (const file of files) {
+      fs.unlink(path.join(directory, file), err => {
+        if (err) throw err;
+      });
+    }
+  });
+}
+
+module.exports = { compareFiles, compareFilesUsingRegExp, exportPartialDOMToFile, downloadAsCSV, cleanFilesInDir}

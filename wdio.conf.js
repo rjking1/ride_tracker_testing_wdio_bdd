@@ -67,6 +67,7 @@ exports.config = {
             prefs: {
                 'directory_upgrade': true,
                 'prompt_for_download': false,
+                'profile.default_content_setting_values.automatic_downloads': 1,
                 'download.default_directory': 'C:\\devel\\testing\\ride_tracker_testing_wdio_bdd\\download'
             }
         }
