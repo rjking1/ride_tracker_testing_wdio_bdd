@@ -20,7 +20,21 @@ function compareFiles(
 ) {
   actual = fs.readFileSync(actualFileName, 'utf8'); // cy.readFile(actualFileName).then((actual) => {
   expected = fs.readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
-  
+  compareStrings(actual, expected, tolerance, willFail)
+}
+
+function compareString(
+  actual,
+  expectedFileName,
+  tolerance = 0.001,
+  willFail = false
+) {
+  expected = fs.readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
+  compareStrings(actual, expected, tolerance, willFail)
+}
+
+
+function compareStrings(actual, expected, tolerance = 0.001, willFail = false) {
   // strip CRs leaving only LFs (Windows / Unix)
   actual = actual.replace(/\r\n/g, "\n");
   expected = expected.replace(/\r\n/g, "\n");
@@ -84,7 +98,7 @@ function compareFiles(
             }
           });
           if (!okay) {
-            expect(aline).to.equal(eline);
+            expectChai(aline).to.equal(eline);
           }
         }
       });
@@ -106,6 +120,21 @@ function parseDate(dateString) {
 }
 
 // from https://stackoverflow.com/questions/15547198/export-html-table-to-csv-using-vanilla-javascript
+async function saveTableToString(tableEle, separator = ',') {
+  let data = "";
+  const tableData = [];
+  const rows = await $(tableEle).$$("table tr");
+  for (const row of rows) {
+    const rowData = [];
+    for (column of await row.$$("th, td")) {
+      rowData.push('"' + await column.getText() + '"');
+    }
+    tableData.push(rowData.join(separator));
+  }
+  data += tableData.join("\n");
+  return data;
+}
+
 async function downloadAsCSV(tableEle, fileName, separator = ',') {
   let data = "";
   const tableData = [];
@@ -113,7 +142,7 @@ async function downloadAsCSV(tableEle, fileName, separator = ',') {
   for (const row of rows) {
     const rowData = [];
     for (column of await row.$$("th, td")) {
-        rowData.push('"' + await column.getText() + '"');
+      rowData.push('"' + await column.getText() + '"');
     }
     tableData.push(rowData.join(separator));
   }
@@ -134,10 +163,10 @@ async function downloadCSV(csv, filename) {
       await downloadLink.click();
     }, csv, filename
   );
-    // browser.call(function () {
-      //   // call our custom function that checks for the file to exist
-      //   return waitForFileExists(filename, 60000);
-      // });
+  // browser.call(function () {
+  //   // call our custom function that checks for the file to exist
+  //   return waitForFileExists(filename, 60000);
+  // });
   await browser.pause(1000);
 }
 
@@ -170,17 +199,32 @@ function waitForFileExists(filePath, timeout) {
   });
 }
 
+function compareStringUsingRegExp(
+  actual,
+  expectedFileName,
+  rows = 99999999) {
+  let expected = fs.readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
+  compareStringsUsingRegExp(actual, expected, rows)
+}
+
 function compareFilesUsingRegExp(
   actualFileName,
   expectedFileName,
-  rows = 99999999
-) {
+  rows = 99999999) {
+  let actual = fs.readFileSync(actualFileName, 'utf8'); // cy.readFile(actualFileName).then((actual) => {
+  let expected = fs.readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
+  compareStringsUsingRegExp(actual, expected, rows)
+}
+
+function compareStringsUsingRegExp(
+  actual,
+  expected,
+  rows = 99999999) {
   // this function compares only as many rows as there are in the expected file
   // the remainder of the actual file is not checked
   // (this is to provide a means of having "don't care" fields and rows)
   // the expected file rows are treated as RegExp's
-  actual = fs.readFileSync(actualFileName, 'utf8'); // cy.readFile(actualFileName).then((actual) => {
-  expected = fs.readFileSync(expectedFileName, 'utf8'); //cy.readFile(expectedFileName).then((expected) => {
+
   // strip CRs leaving only LFs (Windows / Unix)
   actual = actual.replace(/\r\n/g, "\n");
   expected = expected.replace(/\r\n/g, "\n");
@@ -201,27 +245,32 @@ function compareFilesUsingRegExp(
 
 async function exportPartialDOMToFile(selector, filename) {
   // this is a poor mans DOM snapshot comparison
-  // but it does the job
-  // will use an official cypress snapshot function/command when we can
   const html = await $(selector).getHTML()
   await downloadCSV(html, filename); // todo rename downloadCSV to be more general
 }
 
+async function comparePartialDOMToFile(selector, expectedFileName, rows = 999999999) {
+  // this is a poor mans DOM snapshot comparison
+  const html = await $(selector).getHTML()
+  const expected = fs.readFileSync(expectedFileName, 'utf8');
+  compareStringsUsingRegExp(html, expected, rows)
+}
+
 // don't use this routine until properly tested!
 // function compareFilesWithIgnoreOption(a, e, ignoreCols = [-1]) {
-  // let alines =
-  // cy.readFile(a).then((actual) => {
-  //   cy.readFile(e).then((expected) => {
-  //     let a = actual.split("\n");
-  //     let e = expected.split("\n");
-  //     for (let i = 0; i++; i < a.length) {
-  //       if (i in ignoreCols) {
-  //       } else {
-  //         expect(a[i]).to.equal(e[i]);
-  //       }
-  //     }
-  //   });
-  // });
+// let alines =
+// cy.readFile(a).then((actual) => {
+//   cy.readFile(e).then((expected) => {
+//     let a = actual.split("\n");
+//     let e = expected.split("\n");
+//     for (let i = 0; i++; i < a.length) {
+//       if (i in ignoreCols) {
+//       } else {
+//         expect(a[i]).to.equal(e[i]);
+//       }
+//     }
+//   });
+// });
 // }
 
 function random(length = 8) {
@@ -240,4 +289,4 @@ async function cleanFilesInDir(directory) {
   });
 }
 
-module.exports = { compareFiles, compareFilesUsingRegExp, exportPartialDOMToFile, downloadAsCSV, cleanFilesInDir}
+module.exports = { compareFiles, compareString, compareStringUsingRegExp, compareFilesUsingRegExp, comparePartialDOMToFile, exportPartialDOMToFile, saveTableToString, downloadAsCSV, cleanFilesInDir }

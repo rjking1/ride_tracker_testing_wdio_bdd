@@ -4,7 +4,10 @@ const {
   compareFiles,
   // compareFilesWithIgnoreOption,
   downloadAsCSV,
-  cleanFilesInDir
+  //cleanFilesInDir,
+  saveTableToString,
+  compareStringUsingRegExp,
+  compareString
 } = require("../common/utils.js");
 
 Then("I can see {string}", (str) => {
@@ -19,7 +22,7 @@ Then("go to {string}", async (str) => {
   // eslint-disable-next-line cypress/no-unnecessary-waiting
   // cy.wait(1000);
   // cy.contains(str).click();
-  await $(`button=${str}`).click();
+  await $(`button*=${str}`).click();
   // eslint-disable-next-line cypress/no-unnecessary-waiting
   // cy.wait(500);
 });
@@ -55,6 +58,14 @@ Then("It should match the expected {string} csv file", async (str) => {
   compareFiles(
     `./download/${str}.csv`,
     `./expected/${str}.csv`
+  );
+});
+
+Then("compare table {string} to file {string}", async (selector, fileName) => {
+  const csv = await saveTableToString(selector);
+  compareString(
+    csv,
+    `./expected/${fileName}.csv`
   );
 });
 

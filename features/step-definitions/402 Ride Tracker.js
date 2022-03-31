@@ -4,9 +4,11 @@ const { Given, When, Then } = require('@wdio/cucumber-framework');
 const {
   compareFiles,
   downloadAsCSV,
+  compareStringUsingRegExp,
   compareFilesUsingRegExp,
-  exportPartialDOMToFile,
-  cleanFilesInDir
+  comparePartialDOMToFile,
+  cleanFilesInDir,
+  saveTableToString
 } = require("./common/utils.js");
 
 // comp: error: SyntaxError: Cannot use import statement outside a module
@@ -41,12 +43,8 @@ Then("check the stats are within reason", async () => {
   const fileName = "ride_tracker.csv";
   // // eslint-disable-next-line cypress/no-unnecessary-waiting
   // cy.wait(2000);
-  exportPartialDOMToFile("pre", fileName);
-  await browser.pause(1000);
-  compareFilesUsingRegExp(
-    `./download/${fileName}`,
-    `./expected/${fileName}`
-  );
+  comparePartialDOMToFile("pre", `./expected/${fileName}`);
+  // await browser.pause(1000);
 });
 
 When("add a ride", async () => {
@@ -62,12 +60,17 @@ When("add a ride", async () => {
 
 Then("check the ride is the most recent", async () => {
   // exportTableToCSV(cy.get("table"), "rides.csv");
-  await downloadAsCSV(await $("table"), "rides.csv");
-  compareFilesUsingRegExp(
-    "./download/rides.csv",
+  // await downloadAsCSV(await $("table"), "rides.csv");
+  // compareFilesUsingRegExp(
+  //   "./download/rides.csv",
+  //   "./expected/rides.csv",
+  //   2
+  // );
+  let csv = await saveTableToString("table");
+  compareStringUsingRegExp(
+    csv,
     "./expected/rides.csv",
-    2
-  );
+    2)
 });
 
 When("edit a ride", async () => {
@@ -82,10 +85,9 @@ When("edit a ride", async () => {
 });
 
 Then("check the ride has been edited correctly", async () => {
-  await downloadAsCSV(await $("table"), "rides2.csv");
-  compareFilesUsingRegExp(
-    "./download/rides2.csv",
+  let csv = await saveTableToString("table");
+  compareStringUsingRegExp(
+    csv,
     "./expected/rides2.csv",
-    2
-  );
+    2)
 });
