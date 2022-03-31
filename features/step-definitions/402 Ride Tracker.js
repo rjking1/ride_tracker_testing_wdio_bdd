@@ -36,7 +36,7 @@ Given("I login to Ride Tracker", async () => {
   await $('#user').setValue('richard');
   await $('#password').setValue('viking');
   await $('#login').click();
-  await browser.pause(1000);
+  await browser.pause(100);
 });
 
 Then("check the stats are within reason", async () => {
