@@ -69,9 +69,9 @@ exports.config = {
                 'prompt_for_download': false,
                 'profile.default_content_setting_values.automatic_downloads': 1,
                 'download.default_directory': 'C:\\devel\\testing\\ride_tracker_testing_wdio_bdd\\download'
-            }
+            },
+            // args: ['--headless']
         }
-        
     }],
     //
     // ===================
@@ -80,7 +80,7 @@ exports.config = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'info',
+    logLevel: 'error',
     //
     // Set specific log levels per logger
     // loggers:
