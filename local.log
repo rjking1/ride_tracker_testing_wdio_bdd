@@ -1,0 +1,12 @@
+"" 
+
+Sun Apr 03 2022 17:46:57 GMT+1000 (Australian Eastern Standard Time) -- ***
+Sun Apr 03 2022 17:46:57 GMT+1000 (Australian Eastern Standard Time) -- Setting the --only-automate parameter will stop local testing via command line from working with BrowserStack Live and BrowserStack Screenshots.
+Sun Apr 03 2022 17:46:57 GMT+1000 (Australian Eastern Standard Time) -- To enable local testing via the command line for Live and Screenshots, rerun BrowserStackLocal without --only-automate.
+Sun Apr 03 2022 17:46:57 GMT+1000 (Australian Eastern Standard Time) -- ***
+
+Sun Apr 03 2022 17:47:00 GMT+1000 (Australian Eastern Standard Time) -- [SUCCESS] You can now access your local server(s) in our remote browser
+
+Sun Apr 03 2022 17:47:00 GMT+1000 (Australian Eastern Standard Time) -- Press Ctrl-C to exit
+
+

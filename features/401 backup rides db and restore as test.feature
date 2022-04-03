@@ -3,7 +3,7 @@ Feature: Backup rides db and restore as test
   copy production to test db
   checks basic logins
 
-@xskip
+@skip
   Scenario: Restore to test db
     Given I login as a developer
     Then  go to "Database"
