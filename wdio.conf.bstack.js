@@ -54,7 +54,7 @@ exports.config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    capabilities: [
+    capabilities: [ 
         // {
     
         // // maxInstances can get overwritten per capability. So if you have an in-house Selenium
@@ -72,6 +72,21 @@ exports.config = {
         // // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
         // // excludeDriverLogs: ['bugreport', 'server'],
         // },
+        // {
+        //     // maxInstances can get overwritten per capability. So if you have an in-house Selenium
+        //     // grid with only 5 firefox instances available you can make sure that not more than
+        //     // 5 instances get started at a time.
+        //     maxInstances: 1,
+        //     //
+        //     device: "iPhone 12",
+        //     browserName: 'iPhone',
+        //     os_version: '14',
+        //     acceptInsecureCerts: true
+        //     // If outputDir is provided WebdriverIO can capture driver session logs
+        //     // it is possible to configure which logTypes to include/exclude.
+        //     // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
+        //     // excludeDriverLogs: ['bugreport', 'server'],
+        // },
         {
 
             // maxInstances can get overwritten per capability. So if you have an in-house Selenium
@@ -79,25 +94,9 @@ exports.config = {
             // 5 instances get started at a time.
             maxInstances: 1,
             //
-            device: "iPhone 12",
-            browserName: 'iPhone',
-            os_version: '14',
-            acceptInsecureCerts: true
-            // If outputDir is provided WebdriverIO can capture driver session logs
-            // it is possible to configure which logTypes to include/exclude.
-            // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
-            // excludeDriverLogs: ['bugreport', 'server'],
-        },
-    {
-
-            // maxInstances can get overwritten per capability. So if you have an in-house Selenium
-            // grid with only 5 firefox instances available you can make sure that not more than
-            // 5 instances get started at a time.
-            maxInstances: 1,
-            //
-            device: "Galaxy S22",
+        device: "Samsung Galaxy S20",
             browserName: 'Android',
-            os_version: '12.0',
+            os_version: '10.0',
             acceptInsecureCerts: true
             // If outputDir is provided WebdriverIO can capture driver session logs
             // it is possible to configure which logTypes to include/exclude.
