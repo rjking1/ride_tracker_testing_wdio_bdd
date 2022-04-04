@@ -43,8 +43,8 @@ Then("check the stats are within reason", async () => {
   const fileName = "ride_tracker.csv";
   // // eslint-disable-next-line cypress/no-unnecessary-waiting
   // cy.wait(2000);
+  await browser.pause(1000);
   comparePartialDOMToFile("pre", `./expected/${fileName}`);
-  // await browser.pause(1000);
 });
 
 When("add a ride", async () => {

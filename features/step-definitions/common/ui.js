@@ -4,7 +4,7 @@ const {
   compareFiles,
   // compareFilesWithIgnoreOption,
   downloadAsCSV,
-  //cleanFilesInDir,
+  cleanFilesInDir,
   saveTableToString,
   compareStringUsingRegExp,
   compareString
@@ -91,5 +91,5 @@ Then("the saved chart should match the expected {string} csv file", (str) => {
 });
 
 Then("Clean download folder", async () => {
-  await cleanFilesInDir('C:\\devel\\testing\\ride_tracker_testing_wdio_bdd\\download')
+  await cleanFilesInDir('C:\\devel\\testing\\wdio\\ride_tracker_testing_wdio_bdd\\download')
 })

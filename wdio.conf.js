@@ -68,7 +68,7 @@ exports.config = {
                 'directory_upgrade': true,
                 'prompt_for_download': false,
                 'profile.default_content_setting_values.automatic_downloads': 1,
-                'download.default_directory': 'C:\\devel\\testing\\ride_tracker_testing_wdio_bdd\\download'
+                'download.default_directory': 'C:\\devel\\testing\\wdio\\ride_tracker_testing_wdio_bdd\\download'
             },
             // args: ['--headless']
         }
@@ -165,7 +165,7 @@ exports.config = {
         // <boolean> fail if there are any undefined or pending steps
         strict: false,
         // <string> (expression) only execute the features or scenarios with tags matching the expression
-        tagExpression: 'not @skip',
+        tagExpression: 'not @skip and not @skip_if_local',
         // <number> timeout for step definitions
         timeout: 60000,
         // <boolean> Enable this config to treat undefined definitions as warnings.
