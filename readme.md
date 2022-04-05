@@ -1,7 +1,7 @@
 # Some notes on moving from Cypress to Webdriverio
 The browser / web app is a my personal Ride Tracker project which runs in the browser with a MySQL backend with a PHP bridge.
 
-A recording of the Cypress tests is [here](https://youtu.be/GD_KnKP9urY) 
+A recording of the Cypress tests is at https://youtu.be/GD_KnKP9urY
 
 Moving from Cypress to Webdriverio was done as a project to identify some of the major differences.
 
@@ -16,9 +16,9 @@ These notes take the form of a journal.
 
 Idea is to start from (and hopefully not have to alter) the two feature files that already exist in the cypress project.  And replace the cypress specific driver code with webdriverio driver code.
 
-Copied the VSCode cypress project and installed webdriverio following the instructions [here](https://webdriver.io/docs/gettingstarted/). Ran init (messed up and chose non-cucumber and page objects).  Worked fine.  
+Copied the VSCode cypress project and installed webdriverio following the instructions at https://webdriver.io/docs/gettingstarted/. Ran init (messed up and chose non-cucumber and page objects).  Worked fine.  
 
-But I'm still in two minds about using page objects - I can see some benefits but using a good naming convention avoids this additinal code which takes time to write and maintain.  And even though it hides actual ids/names it then requies the reader of the code to lookup the page object functions to determine the actual web element.
+But I'm still in two minds about using page objects - I can see some benefits but using a good naming convention avoids this additional code which takes time to write and maintain.  And even though it hides actual ids/names it then requires the reader of the code to lookup the page object functions to determine the actual web element.
 
 For example this is the login page object file:
 
@@ -79,7 +79,6 @@ describe('Ride Tracker application', () => {
         await LoginPage.login('richard', 'xxxxxx');  // todo: use env vars
         // check we are now on the List page (there is no change to the URL!)
         await expect(ListPage.lblLastWeek).toBeExisting();
-        // await expect(LoginPage.flashAlert).toHaveTextContaining('You logged into a secure area!');
     });
 });
 ```
@@ -126,13 +125,13 @@ Again, notice the need to use async and await
 
 Also, cypress encourages the use of the cypress.env.json file whereas webdriverio leaves you to use the standard process.env facility (which I have not done in the interest of getting something going...)
 
-Webdriverio has different but equivalent functions (no problem; eg `cy.visit()` becomes `browser.url()`).  Webdriverio has a powerful means of selecting elements on the web page using a JQuerylike syntax using `$()` to get a single/the first element and `$$()` to get all elements. The selector support in webdriverio is arguably more powerful though cypress has a `.contains()` method in addition to a `.get()` method.
+Webdriverio has different but equivalent functions (no problem; eg `cy.visit()` becomes `browser.url()`).  Webdriverio has a powerful means of selecting elements on the web page using a JQuery like syntax using `$()` to get a single/the first element and `$$()` to get all elements. The selector support in webdriverio is arguably more powerful though cypress has a `.contains()` method in addition to a `.get()` method.
 
 The biggest loss moving from cypress to webdriverio is the loss of the cypress test runner.  But there is a REPL which can really help with debugging.
 
-webdriverio speed is impressive.
+The speed of webdriverio code is impressive.
 
-*Put above points into a table*
+*Todo: Put above points into a table*
 
 ## Going further with webdriverio
 24 March 2022
