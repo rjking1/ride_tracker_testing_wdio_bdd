@@ -169,8 +169,7 @@ Sat, 26 March 2022
 
 Created a trial account on LambdaTest and successfully ran the existing cypress tests on Chrome and Firefox under Max Catalina :)
 
-Attempting the same with Safari fails to start -- appears to confirm that cypress cannot drive Safari :( which is a showstopper for most commercial public facing web sites
-
+Attempting the same with Safari fails to start -- appears to confirm that cypress cannot drive Safari :( which is a showstopper for most commercial public facing web sites. 
 Later on got first test (401) rewritten using webdriverio running on Lambdatest.
 
 ## Lambdatest and webdriverio
@@ -185,7 +184,7 @@ Biggest issues are with being able to download files and control the browser dow
 ## Download issues...
 Tue, 29 March 2022
 
-createElement has to be done very differently on wdio as opposed to cypress. (Cypress is running inside the browser and has full access to the DOM; wdio is "outside" the browser). wdio requires using `browser.execute()`
+`createElement` has to be done very differently on wdio as opposed to cypress. (Cypress is running inside the browser and has full access to the DOM; wdio is "outside" the browser). wdio requires using `browser.execute()`
 
 So this cypress function to download a file by creating an invisible link
 ```
@@ -220,12 +219,16 @@ Also, need to import/require `chaiExpect` in wdio (rather than `chai` in cypress
 
 Discovered I need to set an option to allow Chrome to download multiple files else a prompt interrupts testing on a Mac.
 
-Played with the wdio REPL.  `npx wdio repl chrome` Very useful for debugging.
+Played with the wdio REPL:
+
+    npx wdio repl chrome
+
+Very useful for debugging.
 
 ## Download issues...resolved
 Wed, 30 March 2022
 
-Idea: avoid downloading files by comparing the string that was being saved to file (to be compared with the expected result by doing a file to file comparison), by comparing the string with the expected file directly.  This requires restructuring and rewriting the download/compare functions.
+Idea: avoid downloading files by comparing the string that was being saved to a file (to be compared with the expected result by doing a file to file comparison), by directly comparing the string with the expected file.  This requires restructuring and rewriting the download/compare functions.
 
 ## No more download files
 Thurs, 31 March 2022
@@ -249,8 +252,9 @@ Sun, 3 April
 
 My Lambdatest account has limited time left. Experimented with running the tests on Saucelabs...gave up! Instructions not clear.
 
-Browserstack trial account next - easy! Make sure tunnel is false!
-Tests on Windows/Chrome, Mac/Safari, Samsung Galaxy (Android) and iPhone 12 (iOS) all run successfully.  Actualy, have the same space difference running on Mac/Safari as seen on Lambdatest.  At least consistent.
+Browserstack trial account next - easy! Again set user and key and service and install `@wdio/browserstack-service`. Make sure tunnel is false!
+
+Tests on Windows/Chrome, Mac/Safari, Samsung Galaxy (Android) and iPhone 12 (iOS) all run successfully.  And, have the same space difference running on Mac/Safari as seen on Lambdatest.  At least consistent.
 
 ## Tags
 Mon, 4 April 2022
@@ -263,6 +267,4 @@ Read about Serenity/JS -- builds on Webdriverio.  To be investigated.
 
 1. Use environment vars (process.env.XXXX)
 2. Use typescript -- should have started that way...
-
-
 
