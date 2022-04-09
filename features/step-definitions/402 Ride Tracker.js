@@ -50,6 +50,8 @@ Then("check the stats are within reason", async () => {
 When("add a ride", async () => {
   await $("button=Add").click();
   await browser.pause(500);
+  await $("#id_route").selectByVisibleText("Beach Rd etc");
+  await $("#id_bike").selectByVisibleText("Chris bike");
   await $("#id_km").setValue("99");
   await $("#id_alt").setValue("1234");
   await $("#id_desc").setValue("test ride");
@@ -76,6 +78,9 @@ Then("check the ride is the most recent", async () => {
 When("edit a ride", async () => {
   await $("button=✎ Edit").click();
   await browser.pause(500);
+  //should check all fields are correct here before we change them
+  await $("#id_route").selectByVisibleText("Breakfast");
+  await $("#id_bike").selectByVisibleText("Velov");
   await $("#id_km").setValue("88");
   await $("#id_alt").setValue("1111");
   await $("#id_desc").setValue("test ride edited");
